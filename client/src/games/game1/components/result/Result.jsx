@@ -1,32 +1,211 @@
-// import useStore from "../stores/game";
+// import { useNavigate } from "react-router-dom";
+// import useStore from "../../stores/game";
+// import { useState } from "react";
+
+// export function Result() {
+//   const status = useStore((state) => state.status);
+//   const score = useStore((state) => state.score);
+//   const reset = useStore((state) => state.reset);
+//   const navigate = useNavigate();
+
+//   const [showVideo, setShowVideo] = useState(false);
+
+//   if (status === "running") return null;
+
+//   return (
+//     <div id="result-container">
+//       {showVideo ? (
+//         //  Fullscreen Video Modal
+//         <div
+//           style={{
+//             position: "fixed",
+//             inset: 0,
+//             background: "rgba(0, 0, 0, 0.9)",
+//             display: "flex",
+//             justifyContent: "center",
+//             alignItems: "center",
+//             zIndex: 1000,
+//           }}
+//         >
+//           <video
+//             style={{
+//               maxWidth: "90%",
+//               maxHeight: "90%",
+//               borderRadius: "12px",
+//               boxShadow: "0 0 20px rgba(0,0,0,0.8)",
+//             }}
+//             // autoPlay
+//             controls
+//             controlsList="download"
+//             onEnded={() => {
+//               setShowVideo(false);
+//               navigate("/game/1");
+//             }}
+//           >
+//             <source src="/assets/videos/cat.mp4" type="video/mp4" />
+//             Your browser does not support the video tag.
+//           </video>
+
+//           {/*  Close Button */}
+//           <button
+//             onClick={() => setShowVideo(false)}
+//             style={{
+//               position: "absolute",
+//               top: "20px",
+//               right: "30px",
+//               fontSize: "2rem",
+//               background: "transparent",
+//               border: "none",
+//               color: "white",
+//               cursor: "pointer",
+//             }}
+//           >
+//             ✖
+//           </button>
+//         </div>
+//       ) : (
+//         //  Normal Game Over Screen
+//         <div id="result">
+//           <h1>Game Over</h1>
+//           <p>Your score: {score}</p>
+//           <div id="button-container">
+//             <div id="first-btn">
+//               <button onClick={reset}>Retry</button>
+//               <button
+//                 onClick={() => {
+//                   navigate(`/`);
+//                 }}
+//               >
+//                 Home
+//               </button>
+//             </div>
+
+//             <div id="second-btn">
+//               <button
+//                 onClick={() => {
+//                   navigate(`/quiz`);
+//                 }}
+//               >
+//                 Take Quiz
+//               </button>
+//               <button onClick={() => setShowVideo(true)}> Watch Video</button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
 import { useNavigate } from "react-router-dom";
 import useStore from "../../stores/game";
-// import "./Result.css";
+import { useState } from "react";
 
 export function Result() {
   const status = useStore((state) => state.status);
   const score = useStore((state) => state.score);
   const reset = useStore((state) => state.reset);
+  const markVideoWatched = useStore((state) => state.markVideoWatched);
+  const markQuizCompleted = useStore((state) => state.markQuizCompleted);
+  const videoWatched = useStore((state) => state.videoWatched);
+  const quizCompleted = useStore((state) => state.quizCompleted);
+
   const navigate = useNavigate();
+  const [showVideo, setShowVideo] = useState(false);
 
   if (status === "running") return null;
 
   return (
     <div id="result-container">
-      <div id="result">
-        <h1>Game Over</h1>
-        <p>Your score: {score}</p>
-        <div id="button-container">
-          <button onClick={reset}>Retry</button>
-          <button
-            onClick={() => {
-              navigate(`/`);
+      {showVideo ? (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.9)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <video
+            style={{
+              maxWidth: "90%",
+              maxHeight: "90%",
+              borderRadius: "12px",
+              boxShadow: "0 0 20px rgba(0,0,0,0.8)",
+            }}
+            autoPlay
+            controls
+            onEnded={() => {
+              setShowVideo(false);
+              markVideoWatched(); // ✅ mark as completed
+              navigate("/game/1");
             }}
           >
-            Home
+            <source src="/assets/videos/cat.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+          <button
+            onClick={() => setShowVideo(false)}
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "30px",
+              fontSize: "2rem",
+              background: "transparent",
+              border: "none",
+              color: "white",
+              cursor: "pointer",
+            }}
+          >
+            ✖
           </button>
         </div>
-      </div>
+      ) : (
+        <div id="result">
+          <h1>Game Over</h1>
+          <p>Your score: {score}</p>
+          <div id="button-container">
+            {/* ✅ Retry only if BOTH tasks are done */}
+            <div id="first-btn">
+              {videoWatched && quizCompleted && (
+                <button className="btn-gradient-text" onClick={reset}>
+                  Retry
+                </button>
+              )}
+
+              <button
+                className="btn-gradient-text"
+                onClick={() => navigate(`/`)}
+              >
+                Home
+              </button>
+            </div>
+
+            <div id="second-btn">
+              <button
+                className="btn-gradient-text"
+                onClick={() => {
+                  markQuizCompleted(); // ✅ mark quiz done
+                  navigate(`/game/1`);
+                }}
+              >
+                Take Quiz
+              </button>
+
+              <button
+                className="btn-gradient-text"
+                onClick={() => setShowVideo(true)}
+              >
+                Watch Video
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

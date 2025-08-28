@@ -1,12 +1,26 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
+import VariableProximity from "../blocks/TextAnimations/VariableProximity/VariableProximity";
 
 const Navbar = () => {
   const location = useLocation();
+  const containerRef = useRef(null);
 
   return (
     <nav style={styles.navbar}>
-      <div style={styles.logo}>Mediterate</div>
+      <div ref={containerRef} style={{ position: "relative" }}>
+        <h2>
+          <VariableProximity
+            label={"Mediterate"}
+            className={"variable-proximity-animated"}
+            fromFontVariationSettings="'wght' 100, 'opsz' 9"
+            toFontVariationSettings="'wght' 1000, 'opsz' 10"
+            containerRef={containerRef}
+            radius={60}
+            falloff="gaussian"
+          />
+        </h2>
+      </div>
 
       <ul style={styles.links}>
         <li>
@@ -14,7 +28,7 @@ const Navbar = () => {
             to="/"
             style={{
               ...styles.link,
-              ...(location.pathname === '/' ? styles.activeLink : {})
+              ...(location.pathname === "/" ? styles.activeLink : {}),
             }}
           >
             Home
@@ -25,7 +39,7 @@ const Navbar = () => {
             to="/about"
             style={{
               ...styles.link,
-              ...(location.pathname === '/about' ? styles.activeLink : {})
+              ...(location.pathname === "/about" ? styles.activeLink : {}),
             }}
           >
             About
@@ -36,7 +50,7 @@ const Navbar = () => {
             to="/levels"
             style={{
               ...styles.link,
-              ...(location.pathname === '/levels' ? styles.activeLink : {})
+              ...(location.pathname === "/levels" ? styles.activeLink : {}),
             }}
           >
             Levels
@@ -47,7 +61,7 @@ const Navbar = () => {
             to="/login"
             style={{
               ...styles.link,
-              ...(location.pathname === '/login' ? styles.activeLink : {})
+              ...(location.pathname === "/login" ? styles.activeLink : {}),
             }}
           >
             Login
@@ -60,39 +74,39 @@ const Navbar = () => {
 
 const styles = {
   navbar: {
-    width: '90%',
-    padding: '10px 30px',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    background: 'transparent',
-    position: 'absolute',
+    width: "90%",
+    padding: "10px 30px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    background: "transparent",
+    position: "absolute",
     top: 0,
     zIndex: 20,
-    color: 'white',
+    color: "white",
   },
   logo: {
-    fontSize: '1.5rem',
-    fontWeight: '600',
+    fontSize: "1.5rem",
+    fontWeight: "600",
   },
   links: {
-    listStyle: 'none',
-    display: 'flex',
-    gap: '20px',
+    listStyle: "none",
+    display: "flex",
+    gap: "20px",
     margin: 0,
     padding: 0,
   },
   link: {
-    color: 'white',
-    textDecoration: 'none',
-    padding: '8px 16px',
-    borderRadius: '4px',
-    transition: 'all 0.3s ease',
+    color: "white",
+    textDecoration: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    transition: "all 0.3s ease",
   },
   activeLink: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(10px)',
-  }
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(10px)",
+  },
 };
 
 export default Navbar;
