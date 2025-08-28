@@ -1,7 +1,6 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import DirectionalLight from "./DirectionalLight";
-import Particles from "../../components/Particles";
 
 const Scene = ({ children }) => {
   return (
@@ -15,8 +14,6 @@ const Scene = ({ children }) => {
     >
       {/* <OrbitControls /> */}
       <ambientLight />
-
-      <Particles count={80} />
       {/* <directionalLight position={[-100, -100, 200]} /> */}
       {/* <DirectionalLight /> */}
       {children}
