@@ -81,6 +81,7 @@ const Levels = () => {
 
   const onclickHandler = (id) => {
     if (id === 1) navigate("/game/1");
+    else if (id === 2) navigate("/game/2");
     else alert("Game not available yet!");
   };
 
@@ -120,8 +121,8 @@ const Levels = () => {
                     ...(level.difficulty === "Beginner"
                       ? styles.beginnerBadge
                       : level.difficulty === "Intermediate"
-                      ? styles.intermediateBadge
-                      : styles.advancedBadge),
+                        ? styles.intermediateBadge
+                        : styles.advancedBadge),
                   }}
                 >
                   {level.difficulty}
@@ -179,10 +180,9 @@ const Levels = () => {
             <div
               style={{
                 ...styles.progressFill,
-                width: `${
-                  (levels.filter((l) => l.completed).length / levels.length) *
+                width: `${(levels.filter((l) => l.completed).length / levels.length) *
                   100
-                }%`,
+                  }%`,
               }}
             ></div>
           </div>

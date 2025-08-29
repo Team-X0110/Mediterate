@@ -16,6 +16,7 @@ import DefaultLayout from "./layouts/DefaultLayout";
 import GameLayout from "./layouts/GameLayout";
 import { Suspense } from "react";
 import { useEffect } from "react";
+import Game2 from "./pages/Game2";
 
 function ReloadOnGameRoute() {
   const location = useLocation();
@@ -105,6 +106,16 @@ function App() {
             <GameLayout>
               <Suspense fallback={<div>Loading game…</div>}>
                 <Game1 />
+              </Suspense>
+            </GameLayout>
+          }
+        />
+        <Route
+          path="/game/2"
+          element={
+            <GameLayout>
+              <Suspense fallback={<div>Loading game…</div>}>
+                <Game2 />
               </Suspense>
             </GameLayout>
           }
