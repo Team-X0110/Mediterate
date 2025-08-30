@@ -12,7 +12,27 @@
         flex-direction: column;
         align-items: center;
         background-color: white;
-        padding: 20px;
+        padding: 15px;
+        border-radius: 20px;
+    }
+
+    #button-container {
+        padding: 10px;
+    }
+
+    #first-btn {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: end;
+    }
+
+    #second-btn {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: end;
+        margin: 20px;
     }
 
     button {
@@ -21,5 +41,38 @@
         font-family: inherit;
         font-size: inherit;
         cursor: pointer;
+        border-radius: 20px;
     }
+
+    h1,
+    p {
+        color: #0f0b0d;
+    }
+
+    /* button:hover {
+        background-color: rgb(240, 31, 31);
+        color: white;
+    } */
+}
+
+.btn-gradient-text {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 10px 20px;
+    margin: 8px;
+
+    /* gradient text */
+    background: linear-gradient(90deg, #ff512f, #dd2476);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    transition: transform 0.3s ease, text-shadow 0.3s ease;
+}
+
+.btn-gradient-text:hover {
+    transform: scale(1.1);
+    text-shadow: 0 0 10px #ff512f, 0 0 20px #dd2476;
 }

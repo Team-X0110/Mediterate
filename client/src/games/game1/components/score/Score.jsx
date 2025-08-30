@@ -1,5 +1,5 @@
 import useStore from "../../stores/game";
-import "./Score.css";
+// import "./Score.css";
 
 export function Score() {
   const score = useStore((state) => state.score);
