@@ -87,7 +87,13 @@ export function Result() {
             {/* Retry only if BOTH tasks are done */}
             <div id="first-btn">
               {videoWatched && quizCompleted && (
-                <button className="btn-gradient-text" onClick={reset}>
+                <button
+                  className="btn-gradient-text"
+                  onClick={() => {
+                    reset();
+                    navigate(0);
+                  }}
+                >
                   Retry
                 </button>
               )}
