@@ -48,7 +48,7 @@ export function Result() {
               navigate("/game/1");
             }}
           >
-            <source src="/assets/videos/cat.mp4" type="video/mp4" />
+            <source src="/assets/videos/Media-Literacy-01.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
@@ -110,7 +110,9 @@ export function Result() {
               <button
                 className="btn-gradient-text"
                 onClick={() => {
-                  markQuizCompleted(); // mark quiz done
+                  markQuizCompleted();
+                  window.open("https://forms.gle/8sYQTfNyAR4ZVUdg9", "_blank");
+
                   navigate(`/game/1`);
                 }}
               >
