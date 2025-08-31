@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import useStore from "../../stores/game";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import VariableProximity from "../../../../blocks/TextAnimations/VariableProximity/VariableProximity";
 
 export function Result() {
@@ -13,14 +13,58 @@ export function Result() {
   const quizCompleted = useStore((state) => state.quizCompleted);
 
   const ref = useRef();
-
   const navigate = useNavigate();
+
   const [showVideo, setShowVideo] = useState(false);
+  const [loadingVideo, setLoadingVideo] = useState(false);
+
+  const videoSrc =
+    "https://res.cloudinary.com/duct224qr/video/upload/f_auto,q_auto,w_1280/video_2025-08-31_22-20-49_pc6fs6.mp4";
+
+  const thumbnail = videoSrc.replace(".mp4", ".jpg");
+
+  useEffect(() => {
+    let timer;
+    if (loadingVideo) {
+      timer = setTimeout(() => {
+        setShowVideo(true);
+        setLoadingVideo(false);
+      }, 2000);
+    }
+    return () => clearTimeout(timer);
+  }, [loadingVideo]);
 
   if (status === "running") return null;
 
   return (
     <div id="result-container">
+      {loadingVideo && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0, 0, 0, 0.95)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "column",
+            zIndex: 2000,
+          }}
+        >
+          <img
+            src={thumbnail}
+            alt="Video thumbnail"
+            style={{
+              maxWidth: "70%",
+              borderRadius: "12px",
+              marginBottom: "20px",
+              boxShadow: "0 0 20px rgba(0,0,0,0.6)",
+            }}
+          />
+          <p style={{ color: "white", fontSize: "1.5rem" }}>Loading...</p>
+        </div>
+      )}
+
       {showVideo ? (
         <div
           style={{
@@ -41,14 +85,15 @@ export function Result() {
               boxShadow: "0 0 20px rgba(0,0,0,0.8)",
             }}
             autoPlay
+            preload="none"
             controls
             onEnded={() => {
               setShowVideo(false);
-              markVideoWatched(); //  mark as completed
+              markVideoWatched();
               navigate("/game/1");
             }}
           >
-            <source src="/assets/videos/Media-Literacy-01.mp4" type="video/mp4" />
+            <source src={videoSrc} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
 
@@ -84,7 +129,6 @@ export function Result() {
 
           <p>Your score: {score}</p>
           <div id="button-container">
-            {/* Retry only if BOTH tasks are done */}
             <div id="first-btn">
               {videoWatched && quizCompleted && (
                 <button
@@ -112,7 +156,6 @@ export function Result() {
                 onClick={() => {
                   markQuizCompleted();
                   window.open("https://forms.gle/8sYQTfNyAR4ZVUdg9", "_blank");
-
                   navigate(`/game/1`);
                 }}
               >
@@ -121,7 +164,7 @@ export function Result() {
 
               <button
                 className="btn-gradient-text"
-                onClick={() => setShowVideo(true)}
+                onClick={() => setLoadingVideo(true)}
               >
                 Watch Video
               </button>
