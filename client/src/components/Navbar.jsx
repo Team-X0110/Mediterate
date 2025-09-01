@@ -7,68 +7,78 @@ const Navbar = () => {
   const containerRef = useRef(null);
 
   return (
-    <nav style={styles.navbar}>
-      <div ref={containerRef} style={{ position: "relative" }}>
-        <h2>
-          <VariableProximity
-            label={"Mediterate"}
-            className={"variable-proximity-animated"}
-            fromFontVariationSettings="'wght' 100, 'opsz' 9"
-            toFontVariationSettings="'wght' 1000, 'opsz' 10"
-            containerRef={containerRef}
-            radius={60}
-            falloff="gaussian"
-          />
-        </h2>
-      </div>
+      <nav style={styles.navbar}>
+        <div ref={containerRef} style={{ position: "relative" }}>
+          <h2>
+            <VariableProximity
+                label={"Mediterate"}
+                className={"variable-proximity-animated"}
+                fromFontVariationSettings="'wght' 100, 'opsz' 9"
+                toFontVariationSettings="'wght' 1000, 'opsz' 10"
+                containerRef={containerRef}
+                radius={60}
+                falloff="gaussian"
+            />
+          </h2>
+        </div>
 
-      <ul style={styles.links}>
-        <li>
-          <Link
-            to="/"
-            style={{
-              ...styles.link,
-              ...(location.pathname === "/" ? styles.activeLink : {}),
-            }}
-          >
-            Home
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/about"
-            style={{
-              ...styles.link,
-              ...(location.pathname === "/about" ? styles.activeLink : {}),
-            }}
-          >
-            About
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/levels"
-            style={{
-              ...styles.link,
-              ...(location.pathname === "/levels" ? styles.activeLink : {}),
-            }}
-          >
-            Levels
-          </Link>
-        </li>
-        <li>
-          <Link
-            to="/login"
-            style={{
-              ...styles.link,
-              ...(location.pathname === "/login" ? styles.activeLink : {}),
-            }}
-          >
-            Login
-          </Link>
-        </li>
-      </ul>
-    </nav>
+        <ul style={styles.links}>
+          <li>
+            <Link
+                to="/"
+                style={{
+                  ...styles.link,
+                  ...(location.pathname === "/" ? styles.activeLink : {}),
+                }}
+            >
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link
+                to="/about"
+                style={{
+                  ...styles.link,
+                  ...(location.pathname === "/about" ? styles.activeLink : {}),
+                }}
+            >
+              About
+            </Link>
+          </li>
+          <li>
+            <Link
+                to="/levels"
+                style={{
+                  ...styles.link,
+                  ...(location.pathname === "/levels" ? styles.activeLink : {}),
+                }}
+            >
+              Levels
+            </Link>
+          </li>
+          <li>
+            <a
+                href="https://kalpita-ai.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={styles.link}
+            >
+              Kalpita AI
+            </a>
+          </li>
+          <li>
+            <Link
+                to="/login"
+                style={{
+                  ...styles.link,
+                  ...(location.pathname === "/login" ? styles.activeLink : {}),
+                }}
+            >
+              Login
+            </Link>
+          </li>
+        </ul>
+      </nav>
   );
 };
 

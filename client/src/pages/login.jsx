@@ -11,17 +11,15 @@ import {
     signOut
 } from 'firebase/auth';
 import { auth } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 import ParticleBackground from '../components/ParticleBackground';
-// Import Dashboard component - adjust path as needed
-// import Dashboard from './Dashboard';
-// For now, we'll use a placeholder until the import is resolved
 
 const Login = () => {
+    const navigate = useNavigate(); // Add useNavigate hook
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
     const [user, setUser] = useState(null);
     const [error, setError] = useState('');
-    const [showDashboard, setShowDashboard] = useState(false); // New state for routing
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -33,14 +31,14 @@ const Login = () => {
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
-            // Optionally auto-navigate to dashboard when user logs in
-            // if (currentUser) {
-            //     setShowDashboard(true);
-            // }
+            // Auto-redirect to dashboard when user logs in
+            if (currentUser) {
+                navigate('/dashboard');
+            }
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [navigate]);
 
     const handleInputChange = (e) => {
         setFormData({
@@ -65,6 +63,7 @@ const Login = () => {
                     formData.password
                 );
                 console.log('User signed in:', userCredential.user);
+                // Navigation will happen automatically through useEffect
             } else {
                 // Create new user
                 if (formData.password !== formData.confirmPassword) {
@@ -87,6 +86,7 @@ const Login = () => {
                 });
 
                 console.log('User created:', userCredential.user);
+                // Navigation will happen automatically through useEffect
             }
         } catch (error) {
             setError(getErrorMessage(error.code || error.message));
@@ -108,6 +108,7 @@ const Login = () => {
 
             const result = await signInWithPopup(auth, provider);
             console.log('Google sign in successful:', result.user);
+            // Navigation will happen automatically through useEffect
         } catch (error) {
             if (error.code !== 'auth/popup-closed-by-user') {
                 setError(getErrorMessage(error.code));
@@ -129,6 +130,7 @@ const Login = () => {
 
             const result = await signInWithPopup(auth, provider);
             console.log('Facebook sign in successful:', result.user);
+            // Navigation will happen automatically through useEffect
         } catch (error) {
             if (error.code !== 'auth/popup-closed-by-user') {
                 setError(getErrorMessage(error.code));
@@ -162,21 +164,15 @@ const Login = () => {
     const handleSignOut = async () => {
         try {
             await signOut(auth);
-            setShowDashboard(false); // Return to login view
             console.log('User signed out');
         } catch (error) {
             console.error('Sign out error:', error);
         }
     };
 
-    // NEW: Handle navigation to dashboard
+    // Navigate to dashboard manually (for the button click)
     const handleGoToDashboard = () => {
-        setShowDashboard(true);
-    };
-
-    // NEW: Handle back to login (optional, for testing)
-    const handleBackToLogin = () => {
-        setShowDashboard(false);
+        navigate('/dashboard');
     };
 
     const toggleMode = () => {
@@ -219,68 +215,7 @@ const Login = () => {
         }
     };
 
-    // Temporary Dashboard placeholder - replace with actual import once resolved
-    const Dashboard = ({ user, onSignOut, onBackToLogin }) => (
-        <div style={{
-            minHeight: '100vh',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            textAlign: 'center'
-        }}>
-            <div style={{
-                background: 'rgba(0,0,0,0.8)',
-                padding: '40px',
-                borderRadius: '20px',
-                maxWidth: '500px'
-            }}>
-                <h1 style={{ fontSize: '3rem', marginBottom: '20px' }}>Dashboard</h1>
-                <p style={{ fontSize: '1.2rem', marginBottom: '20px' }}>
-                    Welcome to your dashboard, {user?.displayName || user?.email}!
-                </p>
-                <p style={{ marginBottom: '30px', color: '#ccc' }}>
-                    This is a placeholder. Your actual dashboard will load here once the import is fixed.
-                </p>
-                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                    <button
-                        onClick={onBackToLogin}
-                        style={{
-                            background: 'rgba(255,255,255,0.2)',
-                            border: 'none',
-                            color: 'white',
-                            padding: '12px 24px',
-                            borderRadius: '8px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Back to Login
-                    </button>
-                    <button
-                        onClick={onSignOut}
-                        style={{
-                            background: 'rgba(239, 68, 68, 0.8)',
-                            border: 'none',
-                            color: 'white',
-                            padding: '12px 24px',
-                            borderRadius: '8px',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Sign Out
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-
-    // NEW: Render dashboard if showDashboard is true
-    if (showDashboard && user) {
-        return <Dashboard user={user} onSignOut={handleSignOut} onBackToLogin={handleBackToLogin} />;
-    }
-
-    // Show logged in state
+    // Show logged in state with option to go to dashboard
     if (user) {
         return (
             <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
@@ -309,7 +244,7 @@ const Login = () => {
                         </div>
 
                         <button
-                            onClick={handleGoToDashboard} // Updated to use new handler
+                            onClick={handleGoToDashboard}
                             style={styles.submitButton}
                         >
                             Go to Dashboard
