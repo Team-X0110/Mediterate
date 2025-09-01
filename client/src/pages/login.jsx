@@ -1,8 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+    FacebookAuthProvider,
+    updateProfile,
+    sendPasswordResetEmail,
+    onAuthStateChanged,
+    signOut
+} from 'firebase/auth';
+import { auth } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 import ParticleBackground from '../components/ParticleBackground';
 
 const Login = () => {
+    const navigate = useNavigate(); // Add useNavigate hook
     const [isLogin, setIsLogin] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -10,17 +27,152 @@ const Login = () => {
         username: ''
     });
 
+    // Check auth state on component mount
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            // Auto-redirect to dashboard when user logs in
+            if (currentUser) {
+                navigate('/dashboard');
+            }
+        });
+
+        return () => unsubscribe();
+    }, [navigate]);
+
     const handleInputChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
+        // Clear error when user starts typing
+        if (error) setError('');
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission logic here
-        console.log('Form submitted:', formData);
+        setLoading(true);
+        setError('');
+
+        try {
+            if (isLogin) {
+                // Sign in existing user
+                const userCredential = await signInWithEmailAndPassword(
+                    auth,
+                    formData.email,
+                    formData.password
+                );
+                console.log('User signed in:', userCredential.user);
+                // Navigation will happen automatically through useEffect
+            } else {
+                // Create new user
+                if (formData.password !== formData.confirmPassword) {
+                    throw new Error('Passwords do not match');
+                }
+
+                if (formData.password.length < 6) {
+                    throw new Error('Password should be at least 6 characters long');
+                }
+
+                const userCredential = await createUserWithEmailAndPassword(
+                    auth,
+                    formData.email,
+                    formData.password
+                );
+
+                // Update user profile with username
+                await updateProfile(userCredential.user, {
+                    displayName: formData.username
+                });
+
+                console.log('User created:', userCredential.user);
+                // Navigation will happen automatically through useEffect
+            }
+        } catch (error) {
+            setError(getErrorMessage(error.code || error.message));
+            console.error('Auth error:', error);
+        }
+
+        setLoading(false);
+    };
+
+    const handleGoogleSignIn = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+            const provider = new GoogleAuthProvider();
+            // Add additional scopes if needed
+            provider.addScope('profile');
+            provider.addScope('email');
+
+            const result = await signInWithPopup(auth, provider);
+            console.log('Google sign in successful:', result.user);
+            // Navigation will happen automatically through useEffect
+        } catch (error) {
+            if (error.code !== 'auth/popup-closed-by-user') {
+                setError(getErrorMessage(error.code));
+                console.error('Google sign in error:', error);
+            }
+        }
+
+        setLoading(false);
+    };
+
+    const handleFacebookSignIn = async () => {
+        setLoading(true);
+        setError('');
+
+        try {
+            const provider = new FacebookAuthProvider();
+            // Add additional scopes if needed
+            provider.addScope('email');
+
+            const result = await signInWithPopup(auth, provider);
+            console.log('Facebook sign in successful:', result.user);
+            // Navigation will happen automatically through useEffect
+        } catch (error) {
+            if (error.code !== 'auth/popup-closed-by-user') {
+                setError(getErrorMessage(error.code));
+                console.error('Facebook sign in error:', error);
+            }
+        }
+
+        setLoading(false);
+    };
+
+    const handleForgotPassword = async () => {
+        if (!formData.email) {
+            setError('Please enter your email address first');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            await sendPasswordResetEmail(auth, formData.email);
+            alert('Password reset email sent! Check your inbox.');
+        } catch (error) {
+            setError(getErrorMessage(error.code));
+            console.error('Password reset error:', error);
+        }
+
+        setLoading(false);
+    };
+
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            console.log('User signed out');
+        } catch (error) {
+            console.error('Sign out error:', error);
+        }
+    };
+
+    // Navigate to dashboard manually (for the button click)
+    const handleGoToDashboard = () => {
+        navigate('/dashboard');
     };
 
     const toggleMode = () => {
@@ -31,7 +183,84 @@ const Login = () => {
             confirmPassword: '',
             username: ''
         });
+        setError('');
     };
+
+    const getErrorMessage = (errorCode) => {
+        switch (errorCode) {
+            case 'auth/user-not-found':
+                return 'No account found with this email address.';
+            case 'auth/wrong-password':
+                return 'Incorrect password. Please try again.';
+            case 'auth/email-already-in-use':
+                return 'An account with this email already exists.';
+            case 'auth/weak-password':
+                return 'Password should be at least 6 characters long.';
+            case 'auth/invalid-email':
+                return 'Please enter a valid email address.';
+            case 'auth/too-many-requests':
+                return 'Too many failed attempts. Please try again later.';
+            case 'auth/popup-blocked':
+                return 'Pop-up was blocked by your browser. Please allow pop-ups and try again.';
+            case 'auth/cancelled-popup-request':
+                return 'Sign-in was cancelled.';
+            case 'auth/invalid-credential':
+                return 'Invalid email or password. Please check your credentials.';
+            case 'Passwords do not match':
+                return 'Passwords do not match. Please try again.';
+            case 'Password should be at least 6 characters long':
+                return 'Password should be at least 6 characters long.';
+            default:
+                return 'An error occurred. Please try again.';
+        }
+    };
+
+    // Show logged in state with option to go to dashboard
+    if (user) {
+        return (
+            <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+                <ParticleBackground />
+                <div style={styles.container}>
+                    <div style={styles.formContainer}>
+                        <div style={styles.header}>
+                            <h1 style={styles.title}>Welcome Back!</h1>
+                            <p style={styles.subtitle}>
+                                Hello, {user.displayName || user.email}
+                            </p>
+                        </div>
+
+                        {user.photoURL && (
+                            <img
+                                src={user.photoURL}
+                                alt="Profile"
+                                style={styles.profileImage}
+                            />
+                        )}
+
+                        <div style={styles.userInfo}>
+                            <p><strong>Email:</strong> {user.email}</p>
+                            <p><strong>Account Type:</strong> {user.providerData[0]?.providerId || 'Email'}</p>
+                            <p><strong>Verified:</strong> {user.emailVerified ? 'Yes' : 'No'}</p>
+                        </div>
+
+                        <button
+                            onClick={handleGoToDashboard}
+                            style={styles.submitButton}
+                        >
+                            Go to Dashboard
+                        </button>
+
+                        <button
+                            onClick={handleSignOut}
+                            style={{...styles.submitButton, background: 'rgba(239, 68, 68, 0.8)'}}
+                        >
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
@@ -51,6 +280,12 @@ const Login = () => {
                         </p>
                     </div>
 
+                    {error && (
+                        <div style={styles.errorMessage}>
+                            {error}
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit} style={styles.form}>
                         {!isLogin && (
                             <div style={styles.inputGroup}>
@@ -63,6 +298,7 @@ const Login = () => {
                                     style={styles.input}
                                     placeholder="Choose a username"
                                     required={!isLogin}
+                                    disabled={loading}
                                 />
                             </div>
                         )}
@@ -77,6 +313,7 @@ const Login = () => {
                                 style={styles.input}
                                 placeholder="Enter your email"
                                 required
+                                disabled={loading}
                             />
                         </div>
 
@@ -90,6 +327,7 @@ const Login = () => {
                                 style={styles.input}
                                 placeholder="Enter your password"
                                 required
+                                disabled={loading}
                             />
                         </div>
 
@@ -104,18 +342,34 @@ const Login = () => {
                                     style={styles.input}
                                     placeholder="Confirm your password"
                                     required={!isLogin}
+                                    disabled={loading}
                                 />
                             </div>
                         )}
 
                         {isLogin && (
                             <div style={styles.forgotPassword}>
-                                <a href="#" style={styles.forgotLink}>Forgot Password?</a>
+                                <button
+                                    type="button"
+                                    onClick={handleForgotPassword}
+                                    style={styles.forgotLink}
+                                    disabled={loading}
+                                >
+                                    Forgot Password?
+                                </button>
                             </div>
                         )}
 
-                        <button type="submit" style={styles.submitButton}>
-                            {isLogin ? 'Sign In' : 'Create Account'}
+                        <button
+                            type="submit"
+                            style={{
+                                ...styles.submitButton,
+                                opacity: loading ? 0.6 : 1,
+                                cursor: loading ? 'not-allowed' : 'pointer'
+                            }}
+                            disabled={loading}
+                        >
+                            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
                         </button>
                     </form>
 
@@ -124,11 +378,29 @@ const Login = () => {
                     </div>
 
                     <div style={styles.socialButtons}>
-                        <button style={styles.socialButton}>
+                        <button
+                            style={{
+                                ...styles.socialButton,
+                                opacity: loading ? 0.6 : 1,
+                                cursor: loading ? 'not-allowed' : 'pointer'
+                            }}
+                            onClick={handleGoogleSignIn}
+                            disabled={loading}
+                            type="button"
+                        >
                             <span style={styles.socialIcon}>🌐</span>
                             Continue with Google
                         </button>
-                        <button style={styles.socialButton}>
+                        <button
+                            style={{
+                                ...styles.socialButton,
+                                opacity: loading ? 0.6 : 1,
+                                cursor: loading ? 'not-allowed' : 'pointer'
+                            }}
+                            onClick={handleFacebookSignIn}
+                            disabled={loading}
+                            type="button"
+                        >
                             <span style={styles.socialIcon}>📘</span>
                             Continue with Facebook
                         </button>
@@ -140,6 +412,8 @@ const Login = () => {
                             <button
                                 onClick={toggleMode}
                                 style={styles.toggleButton}
+                                disabled={loading}
+                                type="button"
                             >
                                 {isLogin ? 'Sign up' : 'Sign in'}
                             </button>
@@ -199,6 +473,16 @@ const styles = {
         opacity: 0.8,
         lineHeight: '1.4',
     },
+    errorMessage: {
+        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+        border: '1px solid rgba(239, 68, 68, 0.5)',
+        borderRadius: '8px',
+        padding: '12px',
+        marginBottom: '20px',
+        color: '#fca5a5',
+        fontSize: '0.9rem',
+        textAlign: 'center',
+    },
     form: {
         marginBottom: '25px',
     },
@@ -222,15 +506,20 @@ const styles = {
         fontSize: '1rem',
         transition: 'all 0.3s ease',
         boxSizing: 'border-box',
+        outline: 'none',
     },
     forgotPassword: {
         textAlign: 'right',
         marginBottom: '25px',
     },
     forgotLink: {
+        background: 'none',
+        border: 'none',
         color: '#88ccff',
-        textDecoration: 'none',
+        textDecoration: 'underline',
         fontSize: '0.9rem',
+        cursor: 'pointer',
+        padding: '0',
     },
     submitButton: {
         width: '100%',
@@ -322,6 +611,21 @@ const styles = {
         padding: '5px 0',
         fontSize: '0.9rem',
         opacity: 0.9,
+    },
+    userInfo: {
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: '10px',
+        padding: '20px',
+        marginBottom: '20px',
+        fontSize: '0.9rem',
+    },
+    profileImage: {
+        width: '80px',
+        height: '80px',
+        borderRadius: '50%',
+        margin: '0 auto 20px',
+        display: 'block',
+        border: '2px solid rgba(255, 255, 255, 0.2)',
     },
 };
 

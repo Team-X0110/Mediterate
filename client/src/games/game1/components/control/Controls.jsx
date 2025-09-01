@@ -1,7 +1,7 @@
 import React from "react";
 import { queueMove } from "../../stores/player";
 import useEventListeners from "../../hooks/useEventListeners";
-import "./Controls.css";
+// import "./Controls.css";
 
 const Controls = () => {
   useEventListeners();
