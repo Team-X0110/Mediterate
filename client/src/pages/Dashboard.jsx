@@ -14,10 +14,10 @@ const Dashboard = () => {
         bio: ''
     });
     const [stats, setStats] = useState({
-        gamesPlayed: 24,
-        currentLevel: 15,
-        achievements: 8,
-        totalScore: 2450
+        gamesPlayed: 2,
+        currentLevel: 1,
+        achievements: 1,
+        totalScore: 25
     });
 
     useEffect(() => {
